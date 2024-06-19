@@ -5,6 +5,10 @@ import 'package:final_project/screens/login/LoginScreen.dart';
 import 'package:final_project/size_config.dart';
 import 'package:final_project/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class SignUpForm extends StatefulWidget {
   @override
@@ -15,22 +19,19 @@ class _SignUpFormState extends State<SignUpForm> {
   final _formKey = GlobalKey<FormState>();
   String? username;
   String? password;
-  String? image;
   bool? remember = false;
 
   TextEditingController txtUserName = TextEditingController();
   TextEditingController txtPassword = TextEditingController();
-  TextEditingController txtImage = TextEditingController();
 
   FocusNode focusNode = FocusNode();
-
+  File? image;
   Response? response;
   var dio = Dio();
 
   @override
   void initState() {
     super.initState();
-    prosesRegistrasi();
   }
 
   @override
@@ -43,13 +44,23 @@ class _SignUpFormState extends State<SignUpForm> {
           SizedBox(height: getProportionateScreenHeight(30)),
           buildPassword(),
           SizedBox(height: getProportionateScreenHeight(30)),
-          buildImage(),
+          image == null
+              ? Container()
+              : Image.file(image!, height: 250, width: 250, fit: BoxFit.cover),
+          SizedBox(height: getProportionateScreenHeight(30)),
+          DefaultButtonCustomeColor(
+            color: kColorBlue,
+            text: "Pilih Gambar Profile",
+            press: () {
+              pilihGambar();
+            },
+          ),
           SizedBox(height: getProportionateScreenHeight(30)),
           DefaultButtonCustomeColor(
             color: kPrimaryColor,
             text: "Register",
             press: () {
-              prosesRegistrasi();
+              prosesRegistrasi(txtUserName.text, txtPassword.text, image?.path);
             },
           ),
           SizedBox(
@@ -84,12 +95,19 @@ class _SignUpFormState extends State<SignUpForm> {
           svgIcon: "assets/icons/account.svg",
         ),
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your username';
+        }
+        return null;
+      },
     );
   }
 
   TextFormField buildPassword() {
     return TextFormField(
       controller: txtPassword,
+      obscureText: true,
       keyboardType: TextInputType.text,
       style: mTitleStyle,
       decoration: InputDecoration(
@@ -103,35 +121,82 @@ class _SignUpFormState extends State<SignUpForm> {
           svgIcon: "assets/icons/Lock.svg",
         ),
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your password';
+        }
+        return null;
+      },
     );
   }
 
-  TextFormField buildImage() {
-    return TextFormField(
-      controller: txtImage,
-      obscureText: true,
-      keyboardType: TextInputType.text,
-      style: mTitleStyle,
-      decoration: InputDecoration(
-        labelText: 'Image',
-        hintText: 'Enter Your Image',
-        labelStyle: TextStyle(
-          color: focusNode.hasFocus ? mSubtitleColor : kPrimaryColor,
-        ),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: CustomSurffixIcon(
-          svgIcon: "assets/icons/User.svg",
-        ),
-      ),
-    );
+  Future pilihGambar() async {
+    try {
+      final pickedImage =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedImage == null) return;
+
+      setState(() {
+        image = File(pickedImage.path);
+      });
+    } on PlatformException catch (e) {
+      print("Gagal mengambil foto : $e");
+    }
   }
 
-  void prosesRegistrasi() async {
-    response = await dio.post('localhost:3000/users/register', data: {
-      'username': 'djadut',
-      'password': '123456',
-      'image': 'tes.jpg',
-    });
-    print(response!.data);
+  void prosesRegistrasi(userName, password, image) async {
+    utilsApps.showDialog(context);
+    bool status;
+    var message;
+    try {
+      var formData = FormData.fromMap({
+        "username": userName,
+        "password": password,
+        "image": await MultipartFile.fromFile(image),
+      });
+
+      response = await dio.post('http://192.168.200.21:3000/users/register',
+          data: formData);
+
+      status = response!.data['success'];
+      message = response!.data['message'];
+      Navigator.pop(context);
+      if (status) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.success,
+          animType: AnimType.rightSlide,
+          title: 'Peringatan',
+          desc: 'Berhasil Registrasi',
+          btnOkOnPress: () {
+            utilsApps.hideDialog(context);
+            Navigator.pushNamed(context, LoginScreen.routeName);
+          },
+        ).show();
+      } else {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          animType: AnimType.rightSlide,
+          title: 'Peringatan',
+          desc: 'Gagal Registrasi = $message',
+          btnOkOnPress: () {
+            utilsApps.hideDialog(context);
+          },
+        ).show();
+      }
+    } catch (e) {
+      print(e);
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
+        title: 'Peringatan',
+        desc: 'Terjadi Kesalahan Pada Server',
+        btnOkOnPress: () {
+          utilsApps.hideDialog(context);
+        },
+      ).show();
+    }
   }
 }

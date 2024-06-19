@@ -27,9 +27,6 @@ class _RegisterComponent extends State<RegisterComponent> {
                 SizedBox(
                   height: SizeConfig.screenHeight * 0.04,
                 ),
-                SizedBox(
-                  height: SizeConfig.screenHeight * 0.04,
-                ),
                 Padding(
                     padding: EdgeInsets.only(left: 10),
                     child: Row(

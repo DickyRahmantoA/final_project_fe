@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:progress_dialog_null_safe/progress_dialog_null_safe.dart';
 
 import '../size_config.dart';
 
-const String urlRegister = 'http://127.0.0.1:3000/users/register';
+ProgressDialog? pr;
 
 const kPrimaryColor = Color(0xFF1DB9C3);
 const kSecondaryColor = Color(0xFF398AB9);
@@ -157,74 +158,6 @@ var mTravlogContentStyle = GoogleFonts.inter(
 var mTravlogPlaceStyle = GoogleFonts.inter(
     fontSize: 10, fontWeight: FontWeight.w500, color: mBlueColor);
 
-// DateTime _parseDateStr(String inputString) {
-//   DateFormat format = DateFormat.yMMMMd();
-//   return format.parse(inputString);
-// }
-//
-// parseDateIndo (tanggal) {
-//   initializeDateFormatting('id_ID', null);
-//   var dateValue = new DateFormat("yyyy-MM-ddTHH:mm:ssZ", "id_ID")
-//       .parseUTC(tanggal);
-//   String formattedDate =
-//   DateFormat("dd MMM yyyy - HH:mm", "id_ID").format(dateValue);
-//
-//   return formattedDate;
-// }
-//
-
-// nameDay(data) {
-//   initializeDateFormatting('id_ID', null);
-//   var nameDate = new DateFormat('EEEE', "id_ID").format(data);
-//   // String formattedDate =
-//   // DateFormat("EEEE").format(dateValue);
-//   return nameDate;
-// }
-//
-// kodeDay(data) {
-//   initializeDateFormatting('id_ID', null);
-//   var nameDate = new DateFormat('EEEE', "id_ID").format(data);
-//   var kodeDate;
-//   if(nameDate == 'Senin') {
-//     kodeDate = 1;
-//   }else if(nameDate == 'Selasa') {
-//     kodeDate = 2;
-//   }else if(nameDate == 'rabu') {
-//     kodeDate = 3;
-//   }else if(nameDate == 'Kamis') {
-//     kodeDate = 4;
-//   }else if(nameDate == 'Jumat') {
-//     kodeDate = 5;
-//   }else if(nameDate == 'Sabtu') {
-//     kodeDate = 6;
-//   }
-//
-//   return kodeDate;
-// }
-
-//
-// parseDateIndoFullNameMount (tanggal) {
-//   initializeDateFormatting('id_ID', null);
-//   print(tanggal);
-//   var dateValue = DateFormat("yyyy-MM-ddTHH:mm:ssZ", "id_ID")
-//       .parseUTC(tanggal);
-//   print(dateValue);
-//   String formattedDate =
-//   DateFormat("dd MMMM yyyy - HH:mm", "id_ID").format(dateValue);
-//
-//   return formattedDate;
-// }
-//
-// parseDate (tanggal) {
-//   initializeDateFormatting('id_ID', null);
-//   var dateValue = new DateFormat("yyyy-MMMM-ddTHH:mm:ssZ", "id_ID")
-//       .parseUTC(tanggal);
-//   String formattedDate =
-//   DateFormat("dd-mm-yyyy HH:mm", "id_ID").format(dateValue);
-//
-//   return formattedDate;
-// }
-
 class HexColor extends Color {
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 
@@ -237,13 +170,19 @@ class HexColor extends Color {
   }
 }
 
-// var perseDate = (){
-//   var today = new DateTime.now();
-//   var formatedTanggal = new DateFormat.MMMM().format(today);
-//   return formatedTanggal;
-// };
-
 class AlwaysDisabledFocusNode extends FocusNode {
   @override
   bool get hasFocus => false;
+}
+
+class utilsApps {
+  static void showDialog(BuildContext context) {
+    pr = new ProgressDialog(context);
+    pr!.show();
+  }
+
+  static void hideDialog(BuildContext context) {
+    pr = new ProgressDialog(context);
+    pr!.hide();
+  }
 }
